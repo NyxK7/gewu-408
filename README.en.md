@@ -33,6 +33,10 @@ No dependencies. Serve the repository root with any static server, e.g. `node to
 
 Found a mistake? Please [open an issue](https://github.com/NyxK7/gewu-408/issues/new/choose). All explanations and questions are original and not copied from past papers or commercial prep books.
 
+## Privacy
+
+The page loads two fonts (Noto Sans SC, JetBrains Mono) from Google Fonts and falls back to system fonts if that fails. It contacts no other service and collects no data; your quiz history stays in your own browser's local storage.
+
 ## License
 
 Code: [MIT](LICENSE). Lesson texts, questions and screenshots: [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
