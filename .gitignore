@@ -1,0 +1,19 @@
+# 依赖和构建产物
+node_modules/
+dist/
+
+# 密钥和本地配置
+.env
+.env.*
+*.pem
+*.key
+
+# 日志和临时文件
+*.log
+.DS_Store
+Thumbs.db
+*.tmp
+
+# 编辑器
+.vscode/
+.idea/
