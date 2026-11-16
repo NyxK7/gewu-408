@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>格物 408 · 考研计算机综合动画讲解</title>
+    <meta name="description" content="用等距动画把考研 408 的考点一步步演出来：一次访存的全过程、网络协议逐字节解析……参数可调，结果全部由代码算出。" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#eef2fa" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 5l13 7.5v15L20 35 7 27.5v-15z' fill='%23344a8e'/%3E%3Cpath d='M20 5l13 7.5L20 20 7 12.5z' fill='%23405fe5'/%3E%3Cpath d='M20 20v15l13-7.5v-15z' fill='%23253565'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script>
+      // 首帧之前就定好主题和语言，避免闪一下
+      try {
+        const saved = JSON.parse(localStorage.getItem('408viz:theme'));
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        const lang = localStorage.getItem('408viz:lang');
+        if (lang === 'en' || (!lang && !navigator.language.toLowerCase().startsWith('zh'))) document.documentElement.lang = 'en';
+      } catch {
+        document.documentElement.dataset.theme = 'light';
+      }
+    </script>
+    <script type="module" src="js/app.js"></script>
+  </head>
+  <body data-page="home">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" data-i18n-title="menu">
+        <svg viewBox="0 0 18 14" width="18" height="14" aria-hidden="true"><path d="M1.5 2h15M1.5 7h15M1.5 12h15" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+      </button>
+      <a class="brand" href="#/">
+        <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+          <path class="logo-l" d="M20 20v15L7 27.5v-15z" />
+          <path class="logo-r" d="M20 20v15l13-7.5v-15z" />
+          <path class="logo-t" d="M20 5l13 7.5L20 20 7 12.5z" />
+          <path class="logo-cell" d="M20 9.3l5.6 3.2L20 15.7l-5.6-3.2z" />
+          <path class="logo-bits" d="M10.5 18.6v6.4M14 20.6v6.4M26 20.6v6.4M29.5 18.6v6.4" />
+        </svg>
+        <span class="brand-text"><b><em data-i18n="brandEm"></em>408</b></span>
+      </a>
+      <nav class="home-nav"></nav>
+      <div class="now">
+        <b class="now-title"></b>
+        <div class="now-row"><div class="now-steps"></div><span class="now-sub"></span></div>
+      </div>
+      <div class="where">
+        <div class="where-tags"></div>
+      </div>
+      <div class="prog">
+        <div class="prog-bar"><i></i></div>
+        <span class="prog-text"></span>
+      </div>
+      <div class="top-actions">
+        <a class="pill-btn quiz-link" href="#/q"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 2.5h10v11H3zM5.5 6l1.4 1.4L9.8 4.6M5.5 10.5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg><span data-i18n="practice"></span></a>
+        <button class="pill-btn search-btn" data-act="search" data-i18n-title="searchTitle"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M10.4 10.4l3.6 3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg><span data-i18n="search"></span></button>
+        <a class="icon-btn home-btn" href="#/" data-i18n-title="home">
+          <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true"><path d="M2.5 8.2L9 2.8l6.5 5.4M4.4 7v8h3.4v-4.4h2.4V15h3.4V7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" /></svg>
+        </a>
+        <button class="pill-btn lang-btn" data-i18n-title="language"></button>
+        <button class="icon-btn theme-btn" data-i18n-title="theme"></button>
+      </div>
+    </header>
+
+    <main class="home" hidden></main>
+
+    <main class="qz" hidden></main>
+
+    <div class="layout" hidden>
+      <aside class="sidebar panel">
+        <div class="side-head">
+          <h2 data-i18n="syllabus"></h2>
+          <button class="icon-btn side-search" data-act="search" data-i18n-title="searchTitle"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M10.4 10.4l3.6 3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg></button>
+          <button class="icon-btn side-fold" aria-expanded="true">
+            <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M9.5 3.5L5 8l4.5 4.5M13 3.5v9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <button class="icon-btn side-close" data-i18n-title="close">
+            <svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </button>
+        </div>
+        <div class="chips"></div>
+        <nav class="lesson-list"></nav>
+      </aside>
+      <div class="scrim"></div>
+
+      <section class="stage panel">
+        <div class="stage-bar">
+          <div class="seg">
+            <button data-view="net">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1.8L14 5 8 8.2 2 5zM2 8.4l6 3.2 6-3.2M2 11.6l6 3.2 6-3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+              <span class="view-name"></span>
+            </button>
+            <button data-view="seq">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 1.5v13M13 1.5v13" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" /><path d="M3 4.5l9 2m0 0l-2.4.9m2.4-.9l-1.8-1.9M13 9.5l-9 2m0 0l1.8-1.9M4 11.5l2.4.9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" /></svg>
+              <span data-i18n="sequence"></span>
+            </button>
+            <button data-view="doc" hidden>
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 3.2c2.2-.9 4.2-.7 6 .8 1.8-1.5 3.8-1.7 6-.8v9.6c-2.2-.9-4.2-.7-6 .8-1.8-1.5-3.8-1.7-6-.8zM8 4v9.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+              <span data-i18n="principle"></span>
+            </button>
+          </div>
+          <div class="legend"></div>
+        </div>
+        <svg class="net" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" role="img"></svg>
+        <div class="seq" role="img" hidden>
+          <div class="seq-head"></div>
+          <div class="seq-scroll"><svg class="seq-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        </div>
+        <div class="doc" hidden></div>
+        <div class="caption"></div>
+        <div class="stage-tools">
+          <div class="zoom-group">
+            <button class="st-btn zoom-out" data-i18n-title="zoomOut"><svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true"><path d="M2.5 7h9" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg></button>
+            <button class="st-btn zoom-val" data-i18n-title="zoomReset">100%</button>
+            <button class="st-btn zoom-in" data-i18n-title="zoomIn"><svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true"><path d="M2.5 7h9M7 2.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg></button>
+          </div>
+          <button class="st-btn fs-btn" aria-pressed="false" data-i18n-title="fullscreen"><svg class="ic-enter" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg><svg class="ic-exit" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+        </div>
+        <div class="fs-bar">
+          <button class="ctl fs-prev" data-proxy="prev" data-i18n-title="keyPrev"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M7.8 1.8L3.6 6l4.2 4.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+          <button class="ctl fs-play" data-proxy="play" data-i18n-title="keyPlay"></button>
+          <button class="ctl fs-step" data-proxy="step" data-i18n-title="keyStep"><span data-i18n="step"></span></button>
+          <span class="fs-pos"></span>
+          <button class="ctl fs-exit" data-i18n-title="exitFull"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+        </div>
+      </section>
+
+      <div class="pbar panel">
+        <div class="controls">
+          <button class="ctl prev-btn" data-i18n-title="keyPrev">
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M7.8 1.8L3.6 6l4.2 4.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <button class="ctl play-btn" data-i18n-title="keyPlay"></button>
+          <button class="ctl step-btn" data-i18n-title="keyStep"><span data-i18n="step"></span></button>
+        </div>
+        <div class="ptrack" role="group"></div>
+        <span class="ppos"></span>
+        <div class="controls more">
+          <button class="ctl speed-btn" data-i18n-title="speed">1×</button>
+          <button class="ctl reset-btn" data-i18n-title="keyReset">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.7-4M13.6 1.6v3.6H10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <aside class="info panel">
+        <nav class="itabs" role="tablist">
+          <button class="itab" data-itab="talk" role="tab"><span data-i18n="itabTalk"></span></button>
+          <button class="itab" data-itab="params" role="tab"><span data-i18n="itabParams"></span></button>
+          <button class="itab" data-itab="flow" role="tab"><span class="rows-name"></span><span class="flow-count"></span></button>
+        </nav>
+        <div class="ipane info-main" data-pane="talk" aria-live="polite"></div>
+        <div class="ipane info-params" data-pane="params" hidden></div>
+        <section class="ipane flow" data-pane="flow" hidden>
+          <div class="flow-head">
+            <div class="tabs" role="tablist">
+              <button class="tab" data-tab="rows" role="tab"><span class="rows-name"></span></button>
+              <button class="tab" data-tab="state" role="tab"><span class="state-name"></span></button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="pkt-table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+            <p class="empty"></p>
+          </div>
+          <div class="state-wrap" hidden></div>
+        </section>
+      </aside>
+
+      <section class="quiz panel"></section>
+      <div class="gutter gx" data-axis="x" role="separator" aria-orientation="vertical" tabindex="0" data-i18n-title="resizeInfo"></div>
+    </div>
+
+    <dialog class="inspector">
+      <header class="ins-top">
+        <div class="ins-titles">
+          <small class="ins-label"></small>
+          <div class="ins-line"><b class="ins-no"></b><span class="ins-title"></span></div>
+        </div>
+        <div class="ins-nav">
+          <button class="icon-btn ins-prev" aria-label="Previous">
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 7.8L6 3.6l4 4.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <button class="icon-btn ins-next" aria-label="Next">
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 4.2L6 8.4l4-4.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <button class="icon-btn ins-close" aria-label="Close">
+            <svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </button>
+        </div>
+      </header>
+      <dl class="ins-meta"></dl>
+      <p class="ins-hint"></p>
+      <div class="ins-body">
+        <div class="ins-tree"></div>
+        <div class="ins-hex"></div>
+      </div>
+    </dialog>
+    <dialog class="finder">
+      <div class="finder-box">
+        <label class="finder-field"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M10.4 10.4l3.6 3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg><input type="search" autocomplete="off" spellcheck="false" /></label>
+        <ul class="finder-list"></ul>
+      </div>
+    </dialog>
+  </body>
+</html>
