@@ -1,0 +1,43 @@
+name: 内容纠错
+description: 讲解写错了、题目答案不对、动画和文字对不上
+title: "[纠错] "
+labels: ["内容纠错"]
+body:
+  - type: markdown
+    attributes:
+      value: 谢谢指正！写得越具体，改得越快。
+  - type: input
+    id: where
+    attributes:
+      label: 哪节课 / 哪道题
+      description: 课程名或题目的考点名；能贴网址最好（浏览器地址栏里的整段网址）
+      placeholder: 例如：进程调度与甘特图，第 4 步 / 练习题「快速排序第二趟的结果」
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: 哪里不对
+      description: 原来写的是什么
+    validations:
+      required: true
+  - type: textarea
+    id: right
+    attributes:
+      label: 你认为正确的是什么
+      description: 有依据的话请写上（教材章节、考纲条目、推导过程等）
+    validations:
+      required: true
+  - type: input
+    id: params
+    attributes:
+      label: 你改过的参数（如果有）
+      description: 在「参数」里填过的数，方便复现
+  - type: dropdown
+    id: device
+    attributes:
+      label: 在哪里打开的
+      options:
+        - 在线网站（电脑）
+        - 在线网站（手机）
+        - 离线版 HTML
